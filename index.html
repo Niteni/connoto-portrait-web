@@ -1,0 +1,58 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/page.js/1.11.3/page.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link type="text/css" rel="stylesheet" href="style.css"/>
+    <title>Connoto Portrait — here's your pic!</title>
+</head>
+<body>
+
+    <header>
+        <h1><a href="/">Connoto Portrait</a></h1>
+    </header>
+
+    <div id="content">
+        <div id="found-photo" class="late-display">
+            <h2>Here's your photo!</h2>
+        </div>
+
+        <div id="no-photo" class="late-display">
+            <h2>Your photo is on the way!</h2>
+        </div>
+
+        <div id="bad-link" class="late-display">
+            <h2>Oops, check your link!</h2>
+            <p></p>
+        </div>
+
+        <pre/>
+    </div>
+
+    <footer>
+        <p>&copy; 2018 Connoto, a division of The Niteni Corporation</p>
+    </footer>
+
+    <script type="text/javascript">
+        var pre = document.querySelector("pre");
+
+        function showPortrait(ctx, next) {
+            var user = ctx.params[0];
+            var photo = ctx.params[1];
+
+            // user does not exist => 404
+            // photo exists => display
+            // photo does not exist => notify
+            pre.textContent = "user: " + user + "\nphoto: " + photo;
+        };
+
+        function showBadUrl(ctx, next) {
+            pre.textContent = "Sorry, check your link: " + document.URL;
+        };
+
+        page(/^\/(\w+)\/([A-Za-z]{4}-[A-Za-z]{4}-[A-Za-z]{4}-[A-Za-z]{4})/, showPortrait);
+        page('*', showBadUrl);
+        page();
+    </script>
+</body>
+</html>
