@@ -1,6 +1,14 @@
 {
-  "dependencies": {
-    "aws-sdk": "^2.373.0",
-    "netlify-lambda": "^1.1.0"
-  }
+    "name": "connoto-portrait-web",
+    "version": "1.0.0",
+
+    "dependencies": {
+        "aws-sdk": "^2.373.0",
+        "netlify-lambda": "^1.1.0"
+    },
+
+    "scripts": {
+        "start": "netlify-lambda serve src",
+        "build": "netlify-lambda build src"
+    }
 }
