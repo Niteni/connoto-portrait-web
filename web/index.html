@@ -3,7 +3,7 @@
     <meta charset="utf-8"/>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/page.js/1.11.3/page.min.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    <link type="text/css" rel="stylesheet" href="style.css"/>
+    <link type="text/css" rel="stylesheet" href="/style.css"/>
     <title>Connoto Portrait — here's your pic!</title>
 </head>
 <body>
@@ -15,6 +15,7 @@
     <div id="content">
         <div id="found-photo" class="late-display">
             <h2>Here's your photo!</h2>
+            <img/>
         </div>
 
         <div id="no-photo" class="late-display">
@@ -36,21 +37,44 @@
     <script type="text/javascript">
         var pre = document.querySelector("pre");
 
-        function showPortrait(ctx, next) {
+        function checkUrl(src, error, success) {
+            var img = new Image();
+            img.onerror = error;
+            img.onload = success;
+            img.src = src;
+        }
+
+        function showPortrait() {
+            var photo = document.querySelector('#found-photo');
+            photo.querySelector('img').src = this.src;
+            photo.style.display = 'block';
+        }
+
+        function showNotification() {
+            var photo = document.querySelector('#no-photo');
+            photo.style.display = 'block';
+
+            var notificationRequested = ['granted', 'denied'].includes(Notification.permission);
+            if(!notificationRequested) {
+            }
+        }
+
+        function setupPortrait(ctx, next) {
+            const BUCKET_URL = 'http://connoto-portrait-20181212.s3.amazonaws.com/';
             var user = ctx.params[0];
             var photo = ctx.params[1];
 
-            // user does not exist => 404
             // photo exists => display
             // photo does not exist => notify
-            pre.textContent = "user: " + user + "\nphoto: " + photo;
+            var url = BUCKET_URL + user + '/' + photo + '.jpg';
+            checkUrl(url, showNotification, showPortrait);
         };
 
         function showBadUrl(ctx, next) {
             pre.textContent = "Sorry, check your link: " + document.URL;
         };
 
-        page(/^\/(\w+)\/([A-Za-z]{4}-[A-Za-z]{4}-[A-Za-z]{4}-[A-Za-z]{4})/, showPortrait);
+        page(/^\/(\w+)\/([A-Za-z]{4}-[A-Za-z]{4}-[A-Za-z]{4}-[A-Za-z]{4})/, setupPortrait);
         page('*', showBadUrl);
         page();
     </script>
