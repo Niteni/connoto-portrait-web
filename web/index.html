@@ -18,13 +18,18 @@
             <img/>
         </div>
 
-        <div id="no-photo" class="late-display">
+        <div id="no-photo-notify" class="late-display">
             <h2>Your photo is on the way!</h2>
+            <h3>Let us notify you when it's ready.</h3>
+        </div>
+
+        <div id="no-photo-bookmark-reload" class="late-display">
+            <h2>Your photo is on the way!</h2>
+            <h3>Bookmark this page and reload later.</h3>
         </div>
 
         <div id="bad-link" class="late-display">
             <h2>Oops, check your link!</h2>
-            <p></p>
         </div>
 
         <pre/>
@@ -35,7 +40,9 @@
     </footer>
 
     <script type="text/javascript">
-        var pre = document.querySelector("pre");
+        const REGISTER_PHOTO_OBSERVER_URL = 'http://localhost/registerPhotoObserver';
+        const BUCKET_URL = 'http://connoto-portrait-20181212.s3.amazonaws.com/';
+        const PRE = document.querySelector('pre');
 
         function checkUrl(src, error, success) {
             var img = new Image();
@@ -45,33 +52,53 @@
         }
 
         function showPortrait() {
-            var photo = document.querySelector('#found-photo');
-            photo.querySelector('img').src = this.src;
-            photo.style.display = 'block';
+            revealBlock('#found-photo', (e) => e.querySelector('img').src = this.src);
         }
 
-        function showNotification() {
-            var photo = document.querySelector('#no-photo');
-            photo.style.display = 'block';
+        function revealBlock(id, callFirst) {
+            var e = document.querySelector(id);
+            callFirst && callFirst();
+            e.style.display = 'block';
+        }
 
+        function registerPhotoNotification(result) {
+            // @TODO Log photo notification
+
+            if(result == 'granted') {
+                const http = new XMLHTTPRequest();
+                http.open('POST', REGISTER_PHOTO_OBSERVER_URL, true);
+            }
+        }
+
+        function askNotification() {
             var notificationRequested = ['granted', 'denied'].includes(Notification.permission);
             if(!notificationRequested) {
+                window.Notification.requestPermission(registerPhotoNotification);
+            }
+        }
+
+        function showPortraitPending() {
+            const canNotify = window.Notification;
+            if(canNotify) {
+                revealBlock('#no-photo-notify');
+                askNotification();
+            } else {
+                revealBlock('#no-photo-bookmark-reload');
             }
         }
 
         function setupPortrait(ctx, next) {
-            const BUCKET_URL = 'http://connoto-portrait-20181212.s3.amazonaws.com/';
             var user = ctx.params[0];
             var photo = ctx.params[1];
 
             // photo exists => display
             // photo does not exist => notify
             var url = BUCKET_URL + user + '/' + photo + '.jpg';
-            checkUrl(url, showNotification, showPortrait);
+            checkUrl(url, showPortraitPending, showPortrait);
         };
 
         function showBadUrl(ctx, next) {
-            pre.textContent = "Sorry, check your link: " + document.URL;
+            PRE.textContent = "Sorry, check your link: " + document.URL;
         };
 
         page(/^\/(\w+)\/([A-Za-z]{4}-[A-Za-z]{4}-[A-Za-z]{4}-[A-Za-z]{4})/, setupPortrait);
