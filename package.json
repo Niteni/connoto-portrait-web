@@ -1,12 +1,13 @@
 {
     "name": "connoto-portrait-web",
     "version": "1.0.0",
-
     "dependencies": {
+        "async": "^2.6.1",
         "aws-sdk": "^2.373.0",
-        "netlify-lambda": "^1.1.0"
+        "gm": "^1.23.1",
+        "netlify-lambda": "^1.1.0",
+        "spawn-sync": "^2.0.0"
     },
-
     "scripts": {
         "start:lambda": "netlify-lambda serve src",
         "build:lambda": "netlify-lambda build src"
