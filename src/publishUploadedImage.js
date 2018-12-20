@@ -17,14 +17,14 @@ function publishImage(srcObj, destObj, callback) {
         s3.getObject(srcObj, next);
     }
 
-    function checkImageIsJpeg(data, next) {
-        image = gm(data);
+    function checkImageIsJpeg(response, next) {
+        image = gm(response.Body);
         image.format(
             function(err, value) {
                 if(err) {
                     next(err);
-                } else if(value == 'jpeg') {
-                    next(null, image);
+                } else if(value.toLowerCase() == 'jpeg') {
+                    next(null, this);
                 } else {
                     next(ERROR_ORIGINAL_NOT_JPEG);
                 }
@@ -33,7 +33,7 @@ function publishImage(srcObj, destObj, callback) {
     }
 
     function resizeAndInterlaceImage(image, next) {
-        gm.resize(image, PORTRAIT_MAX_EDGE, PORTRAIT_MAX_EDGE)
+        image.resize(PORTRAIT_MAX_EDGE, PORTRAIT_MAX_EDGE)
             .interlace('Line')
             .toBuffer(
                 PORTRAIT_IMAGE_FORMAT,
@@ -51,15 +51,16 @@ function publishImage(srcObj, destObj, callback) {
         s3.putObject(destObj, next);
     }
 
-    function notifyListeners(next) {
+    function notifyListeners(response, next) {
         // @TODO: Query listeners of image
         // @TODO: Push web notification to image listeners
         next(null);
     }
 
     function finishedOperations(err) {
-        var s = JSON.stringify(srcObj);
-        var d = JSON.stringify(destObj);
+        var f = (o) => o.Bucket + '/' + o.Key;
+        var s = f(srcObj);
+        var d = f(destObj);
 
         var action = 'portrait from ' + s + ' to ' + d + ': ';
         if(err) {
