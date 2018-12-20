@@ -51,14 +51,14 @@
             img.src = src;
         }
 
-        function showPortrait() {
-            revealBlock('#found-photo', (e) => e.querySelector('img').src = this.src);
-        }
-
         function revealBlock(id, callFirst) {
             var e = document.querySelector(id);
-            callFirst && callFirst();
+            callFirst && callFirst(e);
             e.style.display = 'block';
+        }
+
+        function showPortrait() {
+            revealBlock('#found-photo', (e) => e.querySelector('img').src = this.src);
         }
 
         function registerPhotoNotification(result) {
